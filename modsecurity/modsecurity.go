@@ -90,7 +90,7 @@ func NewModSecurity() *ModSecurity {
 //       update it, make it in a fashion that won't break the existent parsers.
 //       (e.g. adding extra information _only_ to the end of the string)
 func (msc *ModSecurity) WhoAmI() string {
-	versionFmt := "goModSecurity v%s (%s)"
+	const versionFmt = "goModSecurity v%s (%s)"
 	return fmt.Sprintf(versionFmt, release.Version, release.Platform)
 }
 
