@@ -1,0 +1,144 @@
+image: golang:1.10.3-alpine3.7
+
+variables:
+  PKG_ROOT: /go/src/gitlab.com/torrentalle
+  PKG_NAME: go-modsecurity
+  PKG_PATH: ${PKG_ROOT}/${PKG_NAME}
+
+stages:
+  - build
+  - test
+  - QA
+
+before_script:
+  - mkdir -p ${PKG_ROOT}
+  - ln -s ${CI_PROJECT_DIR} ${PKG_PATH}
+  - cd ${PKG_PATH}
+
+build:
+  stage: build
+  script:
+    - go build -v ./...
+
+race_detector:
+  image: golang:1.10.3-stretch
+  stage: test
+  script:
+    - go test -race -short ./...
+
+#memory_sanitizer:
+#  stage: test
+#  script:
+#    - make msan
+#  cache:
+#    key: ${CI_COMMIT_REF_SLUG}
+#    paths:
+#      - vendor/
+#    policy: pull
+
+unit_tests:
+  stage: test
+  script:
+    - go test -short ./...
+
+# code_coverage:
+#   stage: QA
+#   script:
+#     - make coverage
+#   cache:
+#     key: ${CI_COMMIT_REF_SLUG}
+#     paths:
+#       - vendor/
+#     policy: pull
+
+# code_coverage_report:
+#   stage: QA
+#   script:
+#     - make coverhtml
+#   only:
+#   - master
+#   cache:
+#     key: ${CI_COMMIT_REF_SLUG}
+#     paths:
+#       - vendor/
+#     policy: pull
+
+golint:
+  stage: QA
+  script:
+    - apk add --no-cache git
+    - go get -u golang.org/x/lint/golint
+    - golint -set_exit_status ./...
+
+go_vet:
+  stage: QA
+  script:
+    - go vet -v -all ./...
+
+gofmt:
+  stage: QA
+  script:
+    - gofmt -s  -l . | grep -e '.' && exit 1 || exit 0
+
+gocyclo:
+  stage: QA
+  script:
+    - apk add --no-cache git
+    - go get github.com/fzipp/gocyclo
+    - gocyclo -over 15 .
+
+ineffassign:
+  stage: QA
+  script:
+    - apk add --no-cache git
+    - go get github.com/gordonklaus/ineffassign
+    - ineffassign .
+
+misspell:
+  stage: QA
+  script:
+    - apk add --no-cache git
+    - go get -u github.com/client9/misspell/cmd/misspell
+    - misspell -error *
+
+code_quality:
+  stage: QA
+  image: docker:stable
+  variables:
+    DOCKER_DRIVER: overlay2
+  allow_failure: true
+  services:
+    - docker:stable-dind
+  script:
+    - export SP_VERSION=$(echo "$CI_SERVER_VERSION" | sed 's/^\([0-9]*\)\.\([0-9]*\).*/\1-\2-stable/')
+    - docker run
+        --env SOURCE_CODE="$PWD"
+        --volume ${CI_PROJECT_DIR}:/code
+        --volume /var/run/docker.sock:/var/run/docker.sock
+        "registry.gitlab.com/gitlab-org/security-products/codequality:$SP_VERSION" /code
+  artifacts:
+    paths: [gl-code-quality-report.json]
+  except:
+    variables:
+      - $CODE_QUALITY_DISABLED
+
+sast:
+  stage: test
+  image: docker:stable
+  variables:
+    DOCKER_DRIVER: overlay2
+  allow_failure: true
+  services:
+    - docker:stable-dind
+  script:
+    - export SP_VERSION=$(echo "$CI_SERVER_VERSION" | sed 's/^\([0-9]*\)\.\([0-9]*\).*/\1-\2-stable/')
+    - docker run
+        --env SAST_CONFIDENCE_LEVEL="${SAST_CONFIDENCE_LEVEL:-3}"
+        --volume "${CI_PROJECT_DIR}:/code"
+        --volume /var/run/docker.sock:/var/run/docker.sock
+        "registry.gitlab.com/gitlab-org/security-products/sast:$SP_VERSION" /app/bin/run /code
+  artifacts:
+    paths: [gl-sast-report.json]
+  except:
+    variables:
+      - $SAST_DISABLED
