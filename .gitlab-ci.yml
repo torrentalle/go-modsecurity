@@ -18,13 +18,13 @@ before_script:
 build:
   stage: build
   script:
-    - go build -v ./...
+    - go build -v 
 
 race_detector:
   image: golang:1.10.3-stretch
   stage: test
   script:
-    - go test -race -short ./...
+    - go test -race -short 
 
 #memory_sanitizer:
 #  stage: test
@@ -39,7 +39,7 @@ race_detector:
 unit_tests:
   stage: test
   script:
-    - go test -short ./...
+    - go test -short 
 
 # code_coverage:
 #   stage: QA
@@ -68,7 +68,7 @@ golint:
   script:
     - apk add --no-cache git
     - go get -u golang.org/x/lint/golint
-    - golint -set_exit_status ./...
+    - golint -set_exit_status 
 
 go_vet:
   stage: QA
@@ -99,7 +99,7 @@ misspell:
   script:
     - apk add --no-cache git
     - go get -u github.com/client9/misspell/cmd/misspell
-    - misspell -error *
+    - misspell -error .
 
 code_quality:
   stage: QA
