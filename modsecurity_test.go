@@ -23,3 +23,15 @@ func TestModSecurity_WhoAmI(t *testing.T) {
 	}
 
 }
+
+func TestModSecurity_ConnectorInformation(t *testing.T) {
+	connector := "test-connector"
+	msc := &ModSecurity{}
+	msc.SetConnectorInformation(connector)
+	got := msc.ConnectorInformation()
+
+	if got != connector {
+		t.Errorf("ModSecurity.ConnectorInformation() must return '%s', got '%s'", connector, got)
+	}
+
+}
