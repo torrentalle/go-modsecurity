@@ -97,7 +97,7 @@ func (msc *ModSecurity) WhoAmI() string {
 // ConnectorInformation returns the connector informationthat was set by
 // 'setConnectorInformation'. Check setConnectorInformation documentation
 // to understand the expected format.
-func (msc *ModSecurity) ConnectorInformation(connector string) string {
+func (msc *ModSecurity) ConnectorInformation() string {
 	return msc.connector
 }
 
