@@ -15,7 +15,14 @@ before_script:
   - ln -s ${CI_PROJECT_DIR} ${PKG_PATH}
   - cd ${PKG_PATH}
 
-build:
+build:1.10:
+  image: golang:1.10-alpine3.7
+  stage: build
+  script:
+    - go build -v 
+
+build:1.9:
+  image: golang:1.9-alpine3.7
   stage: build
   script:
     - go build -v 
@@ -36,10 +43,21 @@ race_detector:
 #      - vendor/
 #    policy: pull
 
-unit_tests:
+unit_tests:1.10:
+  image: golang:1.10-alpine3.7
   stage: test
   script:
     - go test -short 
+  dependencies:
+    - build:1.10
+
+unit_tests:1.9:
+  image: golang:1.9-alpine3.7
+  stage: test
+  script:
+    - go test -short 
+  dependencies:
+    - build:1.9
 
 # code_coverage:
 #   stage: QA
