@@ -3,7 +3,7 @@ package modsecurity
 import (
 	"fmt"
 
-	"gitlab.com/torrentalle/go-modsecurity/internal/release"
+	"gitlab.com/torrentalle/go-modsecurity/release"
 )
 
 // ModSecurity is a open source, cross platform web application firewall
