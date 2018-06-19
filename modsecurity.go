@@ -12,13 +12,13 @@ type ModSecurity struct {
 }
 
 // Phase consists in mapping the different stages of a given request.
+type Phase int
+
 // ModSecurity is expected to inspect data based on those "phases".
 // If your module/application use this in a different order, it
 // will lead ModSecurity to act in an unexpected behavior.
 // It is mandatory to call all the phases, even if you don't have this
 // phases segmented in your end.
-type Phase int
-
 const (
 	// ConnectionPhase is the very first information that ModSecurity can
 	// inspect. It is expected to happens before the virtual host name be
@@ -84,24 +84,28 @@ func NewModSecurity() *ModSecurity {
 }
 
 // WhoAmI return information about this ModSecurity version and platform.
+//
 // Platform and version are two questions that community will ask prior to
 // provide support. Making it available internally and to the connector as well.
+//
 // Note: This information maybe will be used by a log parser. If you want to
-//       update it, make it in a fashion that won't break the existent parsers.
-//       (e.g. adding extra information _only_ to the end of the string)
+// update it, make it in a fashion that won't break the existent parsers.
+// (e.g. adding extra information _only_ to the end of the string)
 func (msc *ModSecurity) WhoAmI() string {
 	const versionFmt = "goModSecurity v%s (%s)"
 	return fmt.Sprintf(versionFmt, release.Version, release.Platform)
 }
 
-// ConnectorInformation returns the connector informationthat was set by
-// 'setConnectorInformation'. Check setConnectorInformation documentation
-// to understand the expected format.
+// ConnectorInformation returns the connector information
+//
+// Returns whatever was set by 'setConnectorInformation'.
+// Check  SetConnectorInformation documentation to understand the expected format.
 func (msc *ModSecurity) ConnectorInformation() string {
 	return msc.connector
 }
 
 // SetConnectorInformation set information about the connector that is using the library.
+//
 // For the purpose of log it is necessary for modsecurity to understand which 'connector'
 // is consuming the API.
 // It is strongly recommended to set a information in the following pattern:
