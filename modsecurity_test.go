@@ -1,23 +1,24 @@
 package modsecurity
 
 import (
-	"runtime"
 	"strings"
 	"testing"
+
+	"gitlab.com/torrentalle/go-modsecurity/release"
 )
 
 func TestModSecurity_WhoAmI(t *testing.T) {
 
-	ver := "0.0.1-dev"
+	expectedVersion := release.Version
 
 	msc := &ModSecurity{}
 	got := msc.WhoAmI()
 
-	if !strings.Contains(got, "v"+ver) {
-		t.Errorf("ModSecurity.WhoAmI() must return Version string 'v%s', got '%s'", ver, got)
+	if !strings.Contains(got, "v"+expectedVersion) {
+		t.Errorf("ModSecurity.WhoAmI() must return Version string 'v%s', got '%s'", expectedVersion, got)
 	}
 
-	expectedPlatform := strings.Title(runtime.GOOS)
+	expectedPlatform := release.Platform
 	if !strings.Contains(got, "("+expectedPlatform+")") {
 		t.Errorf("ModSecurity.WhoAmI() must return Platform string '(%s)', got '%s'", expectedPlatform, got)
 	}
